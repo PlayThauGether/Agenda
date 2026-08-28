@@ -165,50 +165,46 @@
 
   /* ---------- Récap ---------- */
   .recap{width:100%;border-collapse:collapse;font-family:var(--mono);table-layout:fixed}
-  .recap th,.recap td{padding:0;border-bottom:1.5px solid var(--trait)}
   .recap thead th{
     font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
-    color:var(--doux);padding:0 0 9px;text-align:center;border-bottom-width:2.5px;
-    border-bottom-color:var(--terracotta);
+    color:var(--doux);padding:0 0 8px;text-align:center;
+    border-bottom:2.5px solid var(--terracotta);
   }
   .recap thead th.quoi{text-align:left}
-  .recap col.membre{width:34px}
-  .recap col.somme{width:40px}
-  .recap tbody td{padding:11px 0;text-align:center;vertical-align:middle}
-  .recap td.quoi{text-align:left;padding-right:10px}
+  .recap col.cmembre{width:36px}
+  .recap col.ctotal{width:42px}
+  .recap tbody td{padding:9px 0;text-align:center;border-bottom:1px solid var(--trait)}
+  .recap tbody tr:last-child td{border-bottom:0}
+  .recap td.quoi{text-align:left;padding-right:12px}
   .recap td.quoi b{
-    display:block;font-family:var(--corps);font-weight:600;font-size:.9rem;
-    line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+    display:block;font-family:var(--corps);font-weight:600;font-size:.88rem;line-height:1.3;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
   }
-  .recap td.quoi span{font-size:.68rem;color:var(--doux)}
+  .recap td.quoi span{font-size:.66rem;color:var(--doux)}
   .recap tr.moisligne td{
-    padding:20px 0 7px;font-size:.62rem;font-weight:700;letter-spacing:.14em;
+    padding:22px 0 6px;font-size:.6rem;font-weight:700;letter-spacing:.14em;
     text-transform:uppercase;color:var(--doux);text-align:left;border-bottom:0;
   }
-  .recap tr.moisligne:first-child td{padding-top:4px}
-  .pion{
-    display:inline-flex;align-items:center;justify-content:center;
-    width:23px;height:23px;border-radius:50%;font-size:.72rem;font-weight:700;
-    border:1.5px solid var(--trait);color:var(--doux);
-  }
-  .pion.oui{background:var(--teal);border-color:var(--teal);color:#fff}
-  .pion.tard{border-color:var(--terracotta);color:var(--terracotta)}
-  .pion.non{border-style:none;color:var(--trait);font-size:.95rem}
-  .pion.vide{border-style:dotted;border-color:var(--doux);opacity:.55}
-  .somme{font-size:.76rem;font-weight:700}
-  .somme.creux{color:var(--doux);font-weight:500}
+  .recap tbody tr.moisligne:first-child td{padding-top:6px}
+  .sig{font-size:.98rem;font-weight:700;line-height:1}
+  .sig.oui{color:var(--teal)}
+  .sig.tard{color:var(--terracotta)}
+  .sig.non{color:var(--doux);font-weight:500}
+  .sig.sans{color:rgba(92,58,33,.26);font-weight:500}
+  .tot{font-size:.74rem;font-weight:700;color:var(--marron)}
+  .tot.creux{color:rgba(92,58,33,.3);font-weight:500}
   .legende{
-    display:flex;flex-wrap:wrap;gap:14px;margin-top:16px;
-    font-family:var(--mono);font-size:.66rem;color:var(--doux);
+    display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:18px;padding-top:14px;
+    border-top:1px solid var(--trait);
+    font-family:var(--mono);font-size:.64rem;color:var(--doux);
   }
-  .legende span{display:inline-flex;align-items:center;gap:6px}
+  .legende b{font-weight:700;font-size:.8rem}
   @media (max-width:430px){
-    .recap col.membre{width:29px}
-    .recap col.somme{width:34px}
-    .pion{width:20px;height:20px;font-size:.66rem}
-    .recap td.quoi b{font-size:.84rem}
-    .recap td.quoi span{font-size:.62rem}
-    .recap thead th{font-size:.55rem;letter-spacing:.06em}
+    .recap col.cmembre{width:30px}
+    .recap col.ctotal{width:36px}
+    .recap thead th{font-size:.54rem;letter-spacing:.05em}
+    .recap td.quoi b{font-size:.83rem}
+    .recap td.quoi span{font-size:.61rem}
   }
 
   /* ---------- Vide ---------- */
@@ -530,7 +526,7 @@ function dessine(){
   });
 }
 
-const PION = { oui:"✓", tard:"+", non:"–", vide:"?" };
+const SIGNE = { oui:"✓", tard:"+", non:"×", sans:"·" };
 
 function dessineRecap(){
   const lot = soirees.filter(s => s.fin >= Date.now());
@@ -546,36 +542,38 @@ function dessineRecap(){
   const lignes = lot.map(s => {
     const d = new Date(s.debut);
     const p = s.presences || {};
+
     let entete = "";
     const cleMois = `${d.getFullYear()}-${d.getMonth()}`;
     if (cleMois !== dernierMois){
       dernierMois = cleMois;
-      entete = `<tr class="moisligne"><td colspan="${noms.length + 2}">
-        ${MOIS_LONG[d.getMonth()]} ${d.getFullYear()}</td></tr>`;
+      entete = `<tr class="moisligne"><td colspan="${noms.length + 2}">${MOIS_LONG[d.getMonth()]} ${d.getFullYear()}</td></tr>`;
     }
 
     let presents = 0;
     const cases = noms.map(([email]) => {
       const uid = uidParEmail[email];
-      const st  = (uid && p[uid]) || "vide";
+      const st  = (uid && p[uid]) || "sans";
       if (st === "oui" || st === "tard") presents++;
-      return `<td><span class="pion ${st}">${PION[st]}</span></td>`;
+      return `<td><span class="sig ${st}">${SIGNE[st]}</span></td>`;
     }).join("");
+
+    const jj = String(d.getDate()).padStart(2,"0") + "/" + String(d.getMonth()+1).padStart(2,"0");
 
     return entete + `<tr>
       <td class="quoi">
         <b>${txt(s.titre)}</b>
-        <span>${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")} · ${heure(s.debut)}${s.lieu ? " · " + txt(s.lieu) : ""}</span>
+        <span>${jj} · ${heure(s.debut)}${s.lieu ? " · " + txt(s.lieu) : ""}</span>
       </td>
       ${cases}
-      <td class="somme ${presents === 0 ? "creux" : ""}">${presents}/${noms.length}</td>
+      <td class="tot ${presents === 0 ? "creux" : ""}">${presents}/${noms.length}</td>
     </tr>`;
   }).join("");
 
   $("#liste").innerHTML = `
     <table class="recap">
       <colgroup>
-        <col>${noms.map(() => '<col class="membre">').join("")}<col class="somme">
+        <col>${noms.map(() => '<col class="cmembre">').join("")}<col class="ctotal">
       </colgroup>
       <thead><tr>
         <th class="quoi">Soirée</th>
@@ -585,10 +583,10 @@ function dessineRecap(){
       <tbody>${lignes}</tbody>
     </table>
     <div class="legende">
-      <span><i class="pion oui">✓</i> là</span>
-      <span><i class="pion tard">+</i> arrive plus tard</span>
-      <span><i class="pion non">–</i> pas là</span>
-      <span><i class="pion vide">?</i> pas répondu</span>
+      <span><b class="sig oui">✓</b> là</span>
+      <span><b class="sig tard">+</b> arrive plus tard</span>
+      <span><b class="sig non">×</b> pas là</span>
+      <span><b class="sig sans">·</b> pas répondu</span>
     </div>`;
 }
 
