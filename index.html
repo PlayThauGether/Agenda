@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Agenda — Play Thau'Gether</title>
 <link rel="manifest" href="manifest.json">
+<link rel="icon" href="favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="icon-192.png">
 <meta name="theme-color" content="#EFE2D3">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -367,6 +369,20 @@ import { getFirestore, collection, doc, addDoc, setDoc, updateDoc, deleteDoc, on
 const $ = s => document.querySelector(s);
 const racine = $("#racine");
 
+// Chrome émet cet événement une seule fois, souvent avant que l'app soit prête :
+// on le retient pour pouvoir proposer l'installation au bon moment.
+let invite = null;
+addEventListener("beforeinstallprompt", e => {
+  e.preventDefault();
+  invite = e;
+  if (document.getElementById("conseil")) conseilInstall();
+});
+addEventListener("appinstalled", () => {
+  invite = null;
+  localStorage.setItem("ptg-install-vu","1");
+  const z = document.getElementById("conseil"); if (z) z.innerHTML = "";
+});
+
 if (firebaseConfig.apiKey === "A_REMPLIR") {
   racine.innerHTML = `<div class="portail">
     <h1>Configuration à terminer</h1>
@@ -545,13 +561,34 @@ function ecranApp(){
 }
 
 function conseilInstall(){
-  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const zone = $("#conseil");
   const pose = window.navigator.standalone || matchMedia("(display-mode: standalone)").matches;
-  if (ios && !pose && !localStorage.getItem("ptg-install-vu")) {
-    $("#conseil").innerHTML = `<div class="installe">
+  if (pose || localStorage.getItem("ptg-install-vu")) return;   // déjà installée
+
+  const masquer = () => { localStorage.setItem("ptg-install-vu","1"); zone.innerHTML = ""; };
+
+  // Android / Chrome : le navigateur nous passe la main, on affiche un vrai bouton
+  if (invite) {
+    zone.innerHTML = `<div class="installe">
+      <span>Installe l'agenda sur ton téléphone pour l'ouvrir d'un geste.</span>
+      <button class="lien-nu" id="poser">Installer</button>
+      <button class="lien-nu" id="ok-install">Plus tard</button></div>`;
+    $("#poser").onclick = async () => {
+      invite.prompt();
+      const { outcome } = await invite.userChoice;
+      invite = null;
+      if (outcome === "accepted") masquer(); else zone.innerHTML = "";
+    };
+    $("#ok-install").onclick = masquer;
+    return;
+  }
+
+  // iOS : aucune API d'installation, il faut expliquer le geste
+  if (/iphone|ipad|ipod/i.test(navigator.userAgent)) {
+    zone.innerHTML = `<div class="installe">
       <span>Ajoute l'agenda à ton écran d'accueil : bouton Partager, puis « Sur l'écran d'accueil ».</span>
       <button class="lien-nu" id="ok-install">OK</button></div>`;
-    $("#ok-install").onclick = () => { localStorage.setItem("ptg-install-vu","1"); $("#conseil").innerHTML = ""; };
+    $("#ok-install").onclick = masquer;
   }
 }
 
