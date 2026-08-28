@@ -236,8 +236,6 @@
   .jour .num{font-family:var(--mono);font-size:.82rem;font-weight:700;line-height:1}
   .jour.avant{opacity:.4}
   .jour.mienoui{border-color:var(--teal);border-width:2.5px;background:rgba(47,110,98,.09)}
-  .jour.miennon{background:rgba(92,58,33,.07)}
-  .jour.miennon .num{text-decoration:line-through;text-decoration-thickness:1.5px;color:var(--doux)}
   .jour.soiree::before{
     content:"";position:absolute;top:0;left:0;right:0;height:4px;background:var(--terracotta);
   }
@@ -246,6 +244,29 @@
   .points i{width:5px;height:5px;border-radius:50%;background:rgba(92,58,33,.16)}
   .points i.ok{background:var(--teal)}
   .points i.tard{background:var(--terracotta)}
+  .dl-bloc{margin-top:26px}
+  .dl-titre{
+    font-family:var(--mono);font-size:.62rem;font-weight:700;letter-spacing:.13em;
+    text-transform:uppercase;color:var(--doux);margin:0 0 10px;
+    padding-bottom:8px;border-bottom:2.5px solid var(--terracotta);
+  }
+  .dl-ligne{
+    display:flex;align-items:baseline;gap:11px;
+    padding:10px 0;border-bottom:1px solid var(--trait);
+  }
+  .dl-ligne:last-child{border-bottom:0}
+  .dl-quand{
+    font-family:var(--mono);font-size:.76rem;font-weight:700;
+    flex:0 0 74px;text-transform:capitalize;
+  }
+  .dl-noms{flex:1;font-size:.85rem;line-height:1.4;min-width:0}
+  .dl-nb{
+    font-family:var(--mono);font-size:.72rem;font-weight:700;color:var(--teal);flex:0 0 auto;
+  }
+  .dl-ligne.pris .dl-quand{color:var(--terracotta)}
+  .dl-ligne.pris .dl-noms::after{
+    content:" — soirée déjà posée";font-family:var(--mono);font-size:.64rem;color:var(--terracotta);
+  }
   .conseilmois{
     margin-top:16px;padding:13px 15px;border:1.5px solid var(--trait);border-radius:12px;
     background:var(--papier);font-size:.85rem;line-height:1.55;
@@ -598,7 +619,7 @@ const cleJour = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0"
 
 async function basculeDispo(cle){
   const actuel  = (dispos[moi.uid] || {})[cle] || "";
-  const suivant = actuel === "" ? "oui" : actuel === "oui" ? "non" : "";
+  const suivant = actuel === "oui" ? "" : "oui";   // coché = dispo, rien = pas dispo
   try {
     await setDoc(doc(db,"dispos",moi.uid),
       { email: moi.email, jours: { [cle]: suivant } }, { merge:true });
@@ -633,38 +654,40 @@ function dessineDispos(){
     const mien = (dispos[moi.uid] || {})[cle] || "";
     const aSoiree = !!soireeParJour[cle];
 
-    let libres = 0;
+    const libresNoms = [];
     const points = emails.map(email => {
       const uid = uidParEmail[email];
       const st  = uid ? (dispos[uid] || {})[cle] : "";
-      if (st === "oui") libres++;
+      if (st === "oui") libresNoms.push(MEMBRES[email]);
       return `<i class="${st === "oui" ? "ok" : ""}"></i>`;
     }).join("");
+    const libres = libresNoms.length;
 
-    if (d >= debutJour && !aSoiree) scores.push({ n, d, libres });
+    if (libres >= 2) scores.push({ n, d, libres, noms: libresNoms, aSoiree });
 
     const classes = ["jour"];
     if (mien === "oui") classes.push("mienoui");
-    if (mien === "non") classes.push("miennon");
     if (aSoiree) classes.push("soiree");
     if (d < debutJour) classes.push("avant");
 
     cellules.push(`<button class="${classes.join(" ")}" data-jour="${cle}"
+      aria-pressed="${mien === "oui"}"
       aria-label="${n} ${MOIS_LONG[m]}, ${libres} disponible${libres > 1 ? "s" : ""}${aSoiree ? ", soirée posée" : ""}">
       <span class="num">${n}</span><span class="points">${points}</span></button>`);
   }
 
-  const top = scores.filter(x => x.libres >= 2)
-                    .sort((x, y) => y.libres - x.libres || x.n - y.n)
-                    .slice(0, 3);
-
-  const conseil = top.length
-    ? `<div class="conseilmois">Les jours les plus favorables ce mois-ci :
-        ${top.map(x => `<b>${JOURS_COURTS[(x.d.getDay()+6)%7]} ${x.n}</b> (${x.libres}/${emails.length})`).join(" · ")}.
-        Les jours où une soirée est déjà posée ne sont pas comptés.</div>`
-    : `<div class="conseilmois">Pas encore assez de réponses pour proposer une date.
-        Tape sur les jours où tu es libre : une fois pour <b>disponible</b>, deux fois pour
-        <b>pas disponible</b>, trois fois pour effacer.</div>`;
+  const conseil = scores.length
+    ? `<div class="dl-bloc">
+        <p class="dl-titre">Jours avec au moins 2 personnes</p>
+        ${scores.map(x => `<div class="dl-ligne ${x.aSoiree ? "pris" : ""}">
+          <span class="dl-quand">${JOURS_COURTS[(x.d.getDay()+6)%7]} ${String(x.n).padStart(2,"0")}/${String(m+1).padStart(2,"0")}</span>
+          <span class="dl-noms">${x.noms.join(" · ")}</span>
+          <span class="dl-nb">${x.libres}/${emails.length}</span>
+        </div>`).join("")}
+      </div>`
+    : `<div class="conseilmois">Aucun jour ne réunit deux personnes pour l'instant.
+        Tape sur les jours où tu es libre — un jour non coché compte comme
+        <b>pas disponible</b>.</div>`;
 
   $("#liste").innerHTML = `
     <div class="navmois">
@@ -680,6 +703,7 @@ function dessineDispos(){
     <div class="aide">
       <span><i class="ok"></i> un point par membre disponible</span>
       <span><i class="bar"></i> soirée déjà posée</span>
+      <span>tape un jour pour te déclarer libre, retape pour annuler</span>
     </div>`;
 
   $("#mois-moins").onclick = () => { moisVu = m === 0  ? { a:a-1, m:11 } : { a, m:m-1 }; dessine(); };
