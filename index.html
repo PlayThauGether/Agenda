@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Agenda — Play Thau'Gether</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#EFE2D3">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Agenda PTG">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --beige:#EFE2D3;
+    --papier:#FAF4EC;
+    --marron:#5C3A21;
+    --terracotta:#C0522A;
+    --teal:#2F6E62;
+    --trait:rgba(92,58,33,.16);
+    --doux:rgba(92,58,33,.58);
+    --rayon:14px;
+    --display:"Bricolage Grotesque",system-ui,sans-serif;
+    --corps:"Inter",system-ui,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--beige);
+    color:var(--marron);
+    font-family:var(--corps);
+    font-size:16px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  button{font:inherit;color:inherit;cursor:pointer}
+  :focus-visible{outline:2.5px solid var(--terracotta);outline-offset:2px;border-radius:4px}
+  .cache{display:none !important}
+
+  /* ---------- Ossature ---------- */
+  .enveloppe{max-width:620px;margin:0 auto;padding:0 18px}
+
+  header.bandeau{
+    padding:26px 0 18px;
+    display:flex;align-items:flex-start;justify-content:space-between;gap:14px;
+  }
+  .marque{font-family:var(--display);font-weight:800;font-size:1.6rem;line-height:1.05;letter-spacing:-.02em;margin:0}
+  .marque span{display:block;font-family:var(--mono);font-weight:500;font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--doux);margin-top:6px}
+  .qui{display:flex;flex-direction:column;align-items:flex-end;gap:5px;font-size:.78rem;color:var(--doux);text-align:right}
+  .lien-nu{background:none;border:0;padding:0;text-decoration:underline;text-underline-offset:3px;font-size:.78rem;color:var(--doux)}
+  .lien-nu:hover{color:var(--terracotta)}
+
+  /* ---------- Boutons ---------- */
+  .btn{
+    border:0;border-radius:999px;padding:11px 20px;
+    font-weight:600;font-size:.9rem;
+    background:var(--marron);color:var(--beige);
+    transition:transform .12s ease,opacity .12s ease;
+  }
+  .btn:hover{opacity:.88}
+  .btn:active{transform:scale(.97)}
+  .btn.plein-terracotta{background:var(--terracotta);color:#fff}
+  .btn.contour{background:transparent;color:var(--marron);border:1.5px solid var(--trait)}
+  .btn.contour:hover{border-color:var(--marron);opacity:1}
+  .btn.large{width:100%;padding:14px}
+
+  /* ---------- Écran de connexion ---------- */
+  .portail{max-width:380px;margin:8vh auto 0;padding:0 22px;text-align:left}
+  .portail h1{font-family:var(--display);font-weight:800;font-size:2.1rem;letter-spacing:-.03em;margin:0 0 6px}
+  .portail p.sous{color:var(--doux);margin:0 0 26px;font-size:.92rem}
+  label{display:block;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--doux);margin-bottom:6px}
+  input,textarea{
+    width:100%;font:inherit;color:var(--marron);
+    background:var(--papier);border:1.5px solid var(--trait);
+    border-radius:10px;padding:12px 13px;margin-bottom:15px;
+  }
+  input:focus,textarea:focus{border-color:var(--marron);outline:none}
+  textarea{resize:vertical;min-height:70px}
+  .alerte{
+    background:rgba(192,82,42,.1);border-left:3px solid var(--terracotta);
+    padding:10px 13px;border-radius:0 8px 8px 0;font-size:.86rem;margin-bottom:15px;
+  }
+
+  /* ---------- Onglets ---------- */
+  .onglets{display:flex;gap:22px;border-bottom:1.5px solid var(--trait);margin-bottom:22px}
+  .onglet{
+    background:none;border:0;padding:0 0 11px;margin-bottom:-1.5px;
+    font-family:var(--mono);font-size:.74rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--doux);border-bottom:2.5px solid transparent;
+  }
+  .onglet[aria-selected="true"]{color:var(--marron);border-bottom-color:var(--terracotta)}
+
+  /* ---------- Carte soirée ---------- */
+  .carte{
+    background:var(--papier);border:1.5px solid var(--trait);border-radius:var(--rayon);
+    margin-bottom:16px;overflow:hidden;
+  }
+  .carte.passee{opacity:.62}
+  .haut{display:flex;gap:15px;padding:17px 17px 14px}
+  .pastille{
+    flex:0 0 58px;text-align:center;background:var(--marron);color:var(--beige);
+    border-radius:10px;padding:9px 0 8px;font-family:var(--mono);
+  }
+  .pastille .j{display:block;font-size:1.45rem;font-weight:700;line-height:1}
+  .pastille .m{display:block;font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;margin-top:4px;opacity:.82}
+  .infos{min-width:0;flex:1}
+  .infos h2{font-family:var(--display);font-weight:700;font-size:1.18rem;letter-spacing:-.015em;margin:0 0 5px;overflow-wrap:anywhere}
+  .meta{font-family:var(--mono);font-size:.76rem;color:var(--doux);line-height:1.7}
+  .meta b{color:var(--marron);font-weight:700}
+  .note{font-size:.88rem;color:var(--doux);margin:9px 0 0;overflow-wrap:anywhere;white-space:pre-wrap}
+
+  /* ---------- Signature : l'appel des 5 ---------- */
+  .appel{
+    display:flex;flex-wrap:wrap;gap:7px;
+    padding:13px 17px;border-top:1.5px dashed var(--trait);
+  }
+  .jeton{
+    display:inline-flex;align-items:center;gap:6px;
+    font-family:var(--mono);font-size:.72rem;font-weight:700;
+    padding:5px 11px;border-radius:999px;border:1.5px solid var(--trait);
+    color:var(--doux);background:transparent;
+  }
+  .jeton::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--trait);flex:0 0 auto}
+  .jeton.oui{background:var(--teal);border-color:var(--teal);color:#fff}
+  .jeton.oui::before{background:#fff}
+  .jeton.peutetre{border-color:var(--terracotta);color:var(--terracotta)}
+  .jeton.peutetre::before{background:var(--terracotta)}
+  .jeton.non{color:var(--doux);text-decoration:line-through;text-decoration-thickness:1.5px}
+  .jeton.moi{box-shadow:0 0 0 3px rgba(92,58,33,.1)}
+
+  /* ---------- Barre de réponse ---------- */
+  .repondre{display:flex;gap:8px;padding:0 17px 15px}
+  .rep{
+    flex:1;border:1.5px solid var(--trait);background:transparent;border-radius:10px;
+    padding:10px 4px;font-size:.84rem;font-weight:600;color:var(--doux);
+    transition:background .12s ease,color .12s ease,border-color .12s ease;
+  }
+  .rep:hover{border-color:var(--marron);color:var(--marron)}
+  .rep[aria-pressed="true"]{background:var(--marron);border-color:var(--marron);color:var(--beige)}
+  .rep.oui[aria-pressed="true"]{background:var(--teal);border-color:var(--teal);color:#fff}
+  .rep.peutetre[aria-pressed="true"]{background:var(--terracotta);border-color:var(--terracotta);color:#fff}
+
+  .pied-carte{
+    display:flex;gap:16px;align-items:center;
+    padding:11px 17px;border-top:1.5px solid var(--trait);background:rgba(92,58,33,.03);
+  }
+
+  /* ---------- Vide ---------- */
+  .vide{
+    text-align:center;padding:52px 24px;border:1.5px dashed var(--trait);
+    border-radius:var(--rayon);color:var(--doux);
+  }
+  .vide strong{display:block;font-family:var(--display);font-size:1.15rem;color:var(--marron);margin-bottom:6px}
+
+  /* ---------- Voile & panneaux ---------- */
+  .voile{
+    position:fixed;inset:0;background:rgba(45,28,16,.5);
+    display:flex;align-items:flex-end;justify-content:center;z-index:50;
+    padding:16px;
+  }
+  .panneau{
+    background:var(--papier);border-radius:18px;padding:22px;
+    width:100%;max-width:520px;max-height:88vh;overflow:auto;
+    animation:monte .22s ease;
+  }
+  @keyframes monte{from{transform:translateY(16px);opacity:0}to{transform:none;opacity:1}}
+  @media (prefers-reduced-motion:reduce){
+    .panneau{animation:none}
+    *{transition:none !important}
+  }
+  @media (min-width:560px){.voile{align-items:center}}
+  .panneau h3{font-family:var(--display);font-weight:800;font-size:1.3rem;letter-spacing:-.02em;margin:0 0 4px}
+  .panneau p.sous{color:var(--doux);font-size:.88rem;margin:0 0 20px}
+  .duo{display:flex;gap:11px}
+  .duo>*{flex:1}
+
+  .flottant{
+    position:fixed;left:50%;transform:translateX(-50%);
+    bottom:calc(20px + env(safe-area-inset-bottom));
+    z-index:20;box-shadow:0 6px 22px rgba(45,28,16,.26);
+  }
+  .installe{
+    background:var(--papier);border:1.5px solid var(--trait);border-radius:12px;
+    padding:13px 15px;font-size:.83rem;color:var(--doux);margin-bottom:18px;
+    display:flex;gap:12px;align-items:flex-start;
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ À REMPLIR ============ -->
+<script type="module">
+// ─────────────────────────────────────────────────────────────
+//  1. Config Firebase  (console → Paramètres du projet → Web)
+// ─────────────────────────────────────────────────────────────
+const firebaseConfig = {
+  apiKey: "AIzaSyBrEdgT_X_p1vhOMOmtgvysz68MZP_ocoE",
+  authDomain: "agenda-ptg.firebaseapp.com",
+  projectId: "agenda-ptg",
+  storageBucket: "agenda-ptg.firebasestorage.app",
+  messagingSenderId: "177001914232",
+  appId: "1:177001914232:web:9d82a9d0d4574f5f38328d"
+};
+
+// ─────────────────────────────────────────────────────────────
+//  2. Les 5 membres : adresse Gmail → prénom affiché
+//     (tout compte Google absent de cette liste est refusé)
+// ─────────────────────────────────────────────────────────────
+const MEMBRES = {
+  "roykeaneperso@gmail.com":    "Roy",
+  "miguel.jaine@gmail.com":     "Miguel",
+  "gaetanmuller1995@gmail.com": "Gaetan",
+  "arnaupierrot@gmail.com":     "Pierrot",
+  "azemard.julien@gmail.com":   "Julien"
+};
+
+// ─────────────────────────────────────────────────────────────
+//  3. Qui a le droit de poser et modifier les soirées
+// ─────────────────────────────────────────────────────────────
+const ADMIN_EMAIL = "roykeaneperso@gmail.com";
+
+// ═════════════════════════════════════════════════════════════
+//  Rien à toucher en dessous
+// ═════════════════════════════════════════════════════════════
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, collection, doc, addDoc, setDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const $ = s => document.querySelector(s);
+const racine = $("#racine");
+
+if (firebaseConfig.apiKey === "A_REMPLIR") {
+  racine.innerHTML = `<div class="portail">
+    <h1>Configuration à terminer</h1>
+    <p class="sous">Ouvre <code>index.html</code> et remplace les adresses d'exemple
+    par les vraies Gmail des cinq membres (bloc 2), puis mets la tienne
+    dans <code>ADMIN_EMAIL</code> (bloc 3).</p></div>`;
+  throw new Error("config manquante");
+}
+
+const app  = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db   = getFirestore(app);
+
+let moi = null, soirees = [], vue = "avenir", stop = null, stopMembres = null;
+let uidParEmail = {};                       // rempli par la collection "membres"
+const estAdmin = () => moi && moi.email === ADMIN_EMAIL;
+
+/* ---------------- Dates ---------------- */
+const JOURS = ["dimanche","lundi","mardi","mercredi","jeudi","vendredi","samedi"];
+const MOIS  = ["janv","févr","mars","avr","mai","juin","juil","août","sept","oct","nov","déc"];
+
+const heure = ms => new Date(ms).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"});
+const jourLong = ms => { const d = new Date(ms); return `${JOURS[d.getDay()]} ${d.getDate()} ${MOIS[d.getMonth()]}`; };
+const tampon = ms => new Date(ms).toISOString().replace(/[-:]/g,"").split(".")[0] + "Z";
+const pourInput = ms => {
+  const d = new Date(ms - d0(ms));
+  return d.toISOString().slice(0,16);
+};
+function d0(ms){ return new Date(ms).getTimezoneOffset() * 60000; }
+const echappe = t => String(t||"").replace(/\\/g,"\\\\").replace(/;/g,"\\;").replace(/,/g,"\\,").replace(/\r?\n/g,"\\n");
+
+/* ---------------- Export agenda ---------------- */
+function lienGoogle(s){
+  const p = new URLSearchParams({
+    action:"TEMPLATE",
+    text: s.titre,
+    dates: `${tampon(s.debut)}/${tampon(s.fin)}`,
+    location: s.lieu || "",
+    details: (s.description || "") + "\n\nPlay Thau'Gether"
+  });
+  return "https://calendar.google.com/calendar/render?" + p.toString();
+}
+
+function telechargeIcs(s){
+  const lignes = [
+    "BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Play Thau'Gether//Agenda//FR","CALSCALE:GREGORIAN",
+    "BEGIN:VEVENT",
+    `UID:${s.id}@playthaugether`,
+    `DTSTAMP:${tampon(Date.now())}`,
+    `DTSTART:${tampon(s.debut)}`,
+    `DTEND:${tampon(s.fin)}`,
+    `SUMMARY:${echappe(s.titre)}`,
+    `LOCATION:${echappe(s.lieu)}`,
+    `DESCRIPTION:${echappe((s.description||"") + "\n\nPlay Thau'Gether")}`,
+    "BEGIN:VALARM","TRIGGER:-PT1H","ACTION:DISPLAY",
+    `DESCRIPTION:${echappe(s.titre)} — dans 1 heure`,
+    "END:VALARM","END:VEVENT","END:VCALENDAR"
+  ];
+  const blob = new Blob([lignes.join("\r\n")], {type:"text/calendar;charset=utf-8"});
+  const url  = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = s.titre.replace(/[^\w\sÀ-ÿ-]/g,"").trim().replace(/\s+/g,"-") + ".ics";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 4000);
+}
+
+/* ---------------- Connexion ---------------- */
+function ecranConnexion(erreur){
+  racine.innerHTML = `<div class="portail">
+    <h1>Agenda</h1>
+    <p class="sous">Les soirées de Play Thau'Gether, et qui vient.</p>
+    ${erreur ? `<div class="alerte">${erreur}</div>` : ""}
+    <button class="btn large" id="entrer">Continuer avec Google</button>
+    <p class="sous" style="margin:16px 0 0;font-size:.8rem">
+      Réservé aux cinq membres de l'association.</p>
+  </div>`;
+  $("#entrer").onclick = async () => {
+    const b = $("#entrer"); b.disabled = true; b.textContent = "Connexion…";
+    const fournisseur = new GoogleAuthProvider();
+    fournisseur.setCustomParameters({ prompt: "select_account" });
+    try { await signInWithPopup(auth, fournisseur); }
+    catch (e) {
+      const m = e.code === "auth/popup-closed-by-user" || e.code === "auth/cancelled-popup-request"
+        ? null
+        : e.code === "auth/popup-blocked"
+        ? "Ton navigateur a bloqué la fenêtre Google. Autorise les pop-ups pour ce site."
+        : e.code === "auth/unauthorized-domain"
+        ? "Domaine non autorisé. Ajoute-le dans Firebase → Authentication → Settings."
+        : "Connexion impossible. Vérifie ta connexion internet.";
+      ecranConnexion(m);
+    }
+  };
+}
+
+function ecranRefus(email){
+  racine.innerHTML = `<div class="portail">
+    <h1>Compte non reconnu</h1>
+    <p class="sous">L'agenda est réservé aux cinq membres de Play Thau'Gether.
+    Tu es connecté avec <b>${txt(email)}</b>, qui n'est pas dans la liste.</p>
+    <button class="btn large contour" id="sortir">Essayer un autre compte</button>
+  </div>`;
+  $("#sortir").onclick = () => signOut(auth);
+}
+
+/* ---------------- Application ---------------- */
+function ecranApp(){
+  const admin = estAdmin();
+  racine.innerHTML = `
+    <div class="enveloppe">
+      <header class="bandeau">
+        <h1 class="marque">Agenda<span>Play Thau'Gether</span></h1>
+        <div class="qui">
+          <span>${MEMBRES[moi.email] || moi.email}</span>
+          <button class="lien-nu" id="sortir">Se déconnecter</button>
+        </div>
+      </header>
+      <div id="conseil"></div>
+      <div class="onglets" role="tablist">
+        <button class="onglet" id="t-avenir" role="tab">À venir</button>
+        <button class="onglet" id="t-passe"  role="tab">Passées</button>
+      </div>
+      <div id="liste"></div>
+      <div style="height:96px"></div>
+    </div>
+    ${admin ? `<button class="btn plein-terracotta flottant" id="ajouter">+ Poser une soirée</button>` : ""}`;
+
+  $("#sortir").onclick   = () => signOut(auth);
+  $("#t-avenir").onclick = () => { vue = "avenir"; dessine(); };
+  $("#t-passe").onclick  = () => { vue = "passe";  dessine(); };
+  if (admin) $("#ajouter").onclick = () => panneauSoiree(null);
+
+  conseilInstall();
+
+  stopMembres = onSnapshot(collection(db,"membres"), snap => {
+    uidParEmail = {};
+    snap.docs.forEach(d => { const e = d.data().email; if (e) uidParEmail[e] = d.id; });
+    if (soirees.length) dessine();
+  }, () => {});
+
+  stop = onSnapshot(query(collection(db,"events"), orderBy("debut")), snap => {
+    soirees = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+    dessine();
+  }, () => {
+    $("#liste").innerHTML = `<div class="vide"><strong>Lecture impossible</strong>
+      Vérifie les règles Firestore et ta connexion.</div>`;
+  });
+}
+
+function conseilInstall(){
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const pose = window.navigator.standalone || matchMedia("(display-mode: standalone)").matches;
+  if (ios && !pose && !localStorage.getItem("ptg-install-vu")) {
+    $("#conseil").innerHTML = `<div class="installe">
+      <span>Ajoute l'agenda à ton écran d'accueil : bouton Partager, puis « Sur l'écran d'accueil ».</span>
+      <button class="lien-nu" id="ok-install">OK</button></div>`;
+    $("#ok-install").onclick = () => { localStorage.setItem("ptg-install-vu","1"); $("#conseil").innerHTML = ""; };
+  }
+}
+
+function dessine(){
+  const admin = estAdmin();
+  $("#t-avenir").setAttribute("aria-selected", vue === "avenir");
+  $("#t-passe").setAttribute("aria-selected",  vue === "passe");
+
+  const now = Date.now();
+  let lot = soirees.filter(s => vue === "avenir" ? s.fin >= now : s.fin < now);
+  if (vue === "passe") lot = lot.reverse();
+
+  if (!lot.length){
+    $("#liste").innerHTML = vue === "avenir"
+      ? `<div class="vide"><strong>Rien de posé pour l'instant</strong>
+         ${admin ? "Pose la première soirée avec le bouton en bas." : "Aucune soirée posée pour le moment."}</div>`
+      : `<div class="vide"><strong>Pas encore d'archive</strong>Les soirées terminées s'afficheront ici.</div>`;
+    return;
+  }
+
+  $("#liste").innerHTML = lot.map(s => carte(s, admin)).join("");
+
+  lot.forEach(s => {
+    document.querySelectorAll(`[data-rep="${s.id}"]`).forEach(b => {
+      b.onclick = () => repondre(s, b.dataset.statut);
+    });
+    const cal = document.querySelector(`[data-cal="${s.id}"]`);
+    if (cal) cal.onclick = () => panneauAgenda(s);
+    const mod = document.querySelector(`[data-mod="${s.id}"]`);
+    if (mod) mod.onclick = () => panneauSoiree(s);
+    const sup = document.querySelector(`[data-sup="${s.id}"]`);
+    if (sup) sup.onclick = () => supprimer(s);
+  });
+}
+
+function carte(s, admin){
+  const d = new Date(s.debut);
+  const p = s.presences || {};
+  const mien = p[moi.uid] || null;
+  const passee = s.fin < Date.now();
+
+  const appel = Object.entries(MEMBRES).map(([email, nom]) => {
+    const uid = uidParEmail[email];
+    const st  = (uid && p[uid]) || "";
+    return `<span class="jeton ${st} ${email === moi.email ? "moi" : ""}">${nom}</span>`;
+  }).join("");
+
+  const boutons = ["oui","peutetre","non"].map(st => `
+    <button class="rep ${st}" data-rep="${s.id}" data-statut="${st}"
+      aria-pressed="${mien === st}">${st === "oui" ? "Je viens" : st === "peutetre" ? "Peut-être" : "Pas là"}</button>`).join("");
+
+  return `<article class="carte ${passee ? "passee" : ""}">
+    <div class="haut">
+      <div class="pastille"><span class="j">${d.getDate()}</span><span class="m">${MOIS[d.getMonth()]}</span></div>
+      <div class="infos">
+        <h2>${txt(s.titre)}</h2>
+        <div class="meta">
+          ${jourLong(s.debut)} · <b>${heure(s.debut)} → ${heure(s.fin)}</b>
+          ${s.lieu ? `<br>${txt(s.lieu)}` : ""}
+        </div>
+        ${s.description ? `<p class="note">${txt(s.description)}</p>` : ""}
+      </div>
+    </div>
+    <div class="appel">${appel}</div>
+    ${passee ? "" : `<div class="repondre">${boutons}</div>`}
+    ${(mien === "oui" && !passee) || admin ? `<div class="pied-carte">
+      ${mien === "oui" && !passee ? `<button class="lien-nu" data-cal="${s.id}">Ajouter à mon agenda</button>` : ""}
+      ${admin ? `<button class="lien-nu" data-mod="${s.id}">Modifier</button>
+                 <button class="lien-nu" data-sup="${s.id}">Supprimer</button>` : ""}
+    </div>` : ""}
+  </article>`;
+}
+
+const txt = t => String(t||"").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* ---------------- Actions ---------------- */
+async function repondre(s, statut){
+  const avant = (s.presences || {})[moi.uid];
+  const suivant = avant === statut ? null : statut;
+  try {
+    await updateDoc(doc(db,"events",s.id), { ["presences." + moi.uid]: suivant });
+    if (suivant === "oui") panneauAgenda(s);
+  } catch { alert("Réponse non enregistrée. Vérifie ta connexion."); }
+}
+
+async function supprimer(s){
+  if (!confirm(`Supprimer « ${s.titre} » ? Les réponses seront perdues.`)) return;
+  try { await deleteDoc(doc(db,"events",s.id)); }
+  catch { alert("Suppression impossible."); }
+}
+
+function ferme(){ const v = $("#voile"); if (v) v.remove(); }
+
+function ouvre(html){
+  ferme();
+  const v = document.createElement("div");
+  v.className = "voile"; v.id = "voile";
+  v.innerHTML = `<div class="panneau">${html}</div>`;
+  v.onclick = e => { if (e.target === v) ferme(); };
+  document.body.appendChild(v);
+  document.onkeydown = e => { if (e.key === "Escape") ferme(); };
+}
+
+function panneauAgenda(s){
+  ouvre(`
+    <h3>C'est noté, tu viens</h3>
+    <p class="sous">Ajoute la soirée à ton agenda pour recevoir un rappel une heure avant.</p>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <a class="btn large" style="text-align:center;text-decoration:none;display:block"
+         href="${lienGoogle(s)}" target="_blank" rel="noopener">Ouvrir dans Google Agenda</a>
+      <button class="btn large contour" id="ics">Télécharger pour iPhone (.ics)</button>
+      <button class="lien-nu" id="plus-tard" style="margin-top:6px">Plus tard</button>
+    </div>`);
+  $("#ics").onclick = () => { telechargeIcs(s); ferme(); };
+  $("#plus-tard").onclick = ferme;
+}
+
+function panneauSoiree(s){
+  const edition = !!s;
+  const debutDefaut = s ? pourInput(s.debut) : "";
+  const finDefaut   = s ? pourInput(s.fin)   : "";
+  ouvre(`
+    <h3>${edition ? "Modifier la soirée" : "Poser une soirée"}</h3>
+    <p class="sous">Les cinq membres la verront tout de suite.</p>
+    <div id="err"></div>
+    <label for="f-titre">Nom de la soirée</label>
+    <input id="f-titre" value="${txt(s?.titre)}" placeholder="Loup-Garou">
+    <label for="f-lieu">Lieu</label>
+    <input id="f-lieu" value="${txt(s?.lieu)}" placeholder="Bar L'Audace, Sète">
+    <div class="duo">
+      <div><label for="f-debut">Début</label><input id="f-debut" type="datetime-local" value="${debutDefaut}"></div>
+      <div><label for="f-fin">Fin</label><input id="f-fin" type="datetime-local" value="${finDefaut}"></div>
+    </div>
+    <label for="f-desc">Précisions (facultatif)</label>
+    <textarea id="f-desc" placeholder="Ramener les cartes">${txt(s?.description)}</textarea>
+    <div class="duo" style="margin-top:6px">
+      <button class="btn contour" id="annuler">Annuler</button>
+      <button class="btn plein-terracotta" id="valider">${edition ? "Enregistrer" : "Poser la soirée"}</button>
+    </div>`);
+
+  $("#f-debut").onchange = () => {
+    if (!$("#f-fin").value && $("#f-debut").value) {
+      const f = new Date(Date.parse($("#f-debut").value) + 3*3600000);
+      $("#f-fin").value = pourInput(f.getTime());
+    }
+  };
+  $("#annuler").onclick = ferme;
+  $("#valider").onclick = async () => {
+    const titre = $("#f-titre").value.trim();
+    const debut = Date.parse($("#f-debut").value);
+    const fin   = Date.parse($("#f-fin").value);
+    if (!titre)            return erreurForm("Donne un nom à la soirée.");
+    if (isNaN(debut))      return erreurForm("Indique la date et l'heure de début.");
+    if (isNaN(fin))        return erreurForm("Indique l'heure de fin.");
+    if (fin <= debut)      return erreurForm("La fin doit être après le début.");
+
+    const donnees = {
+      titre, debut, fin,
+      lieu: $("#f-lieu").value.trim(),
+      description: $("#f-desc").value.trim()
+    };
+    const b = $("#valider"); b.disabled = true; b.textContent = "Enregistrement…";
+    try {
+      if (edition) await updateDoc(doc(db,"events",s.id), donnees);
+      else         await addDoc(collection(db,"events"), { ...donnees, presences:{} });
+      ferme();
+    } catch {
+      b.disabled = false; b.textContent = edition ? "Enregistrer" : "Poser la soirée";
+      erreurForm("Enregistrement impossible. Vérifie ta connexion.");
+    }
+  };
+}
+const erreurForm = m => { $("#err").innerHTML = `<div class="alerte">${m}</div>`; };
+
+/* ---------------- Démarrage ---------------- */
+onAuthStateChanged(auth, async u => {
+  ferme();
+  if (stop)        { stop(); stop = null; }
+  if (stopMembres) { stopMembres(); stopMembres = null; }
+  soirees = []; uidParEmail = {};
+
+  if (!u) { moi = null; return ecranConnexion(); }
+
+  const email = (u.email || "").toLowerCase();
+  if (!MEMBRES[email]) { moi = null; return ecranRefus(u.email); }
+
+  moi = u;
+  // L'app enregistre elle-même l'UID : aucun UID à recopier à la main.
+  setDoc(doc(db,"membres",u.uid), { email, nom: MEMBRES[email] }, { merge:true }).catch(()=>{});
+  ecranApp();
+});
+
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js").catch(()=>{});
+}
+</script>
+
+<div id="racine"></div>
+</body>
+</html>
