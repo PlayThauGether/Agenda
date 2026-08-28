@@ -86,7 +86,7 @@
   }
 
   /* ---------- Onglets ---------- */
-  .onglets{display:flex;gap:22px;border-bottom:1.5px solid var(--trait);margin-bottom:22px}
+  .onglets{display:flex;gap:18px;border-bottom:1.5px solid var(--trait);margin-bottom:22px}
   .onglet{
     background:none;border:0;padding:0 0 11px;margin-bottom:-1.5px;
     font-family:var(--mono);font-size:.74rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
@@ -207,6 +207,59 @@
     .recap td.quoi span{font-size:.61rem}
   }
 
+  /* ---------- Dispos ---------- */
+  .navmois{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    margin-bottom:14px;padding-bottom:10px;border-bottom:2.5px solid var(--terracotta);
+  }
+  .navmois h3{
+    font-family:var(--display);font-weight:800;font-size:1.05rem;
+    letter-spacing:.03em;text-transform:uppercase;margin:0;text-align:center;flex:1;
+  }
+  .fleche{
+    background:none;border:1.5px solid var(--trait);border-radius:9px;
+    width:36px;height:32px;font-size:1rem;line-height:1;color:var(--doux);flex:0 0 auto;
+  }
+  .fleche:hover{border-color:var(--marron);color:var(--marron)}
+  .grille{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+  .entetejour{
+    text-align:center;font-family:var(--mono);font-size:.58rem;font-weight:700;
+    letter-spacing:.08em;text-transform:uppercase;color:var(--doux);padding-bottom:3px;
+  }
+  .jour{
+    position:relative;aspect-ratio:1/1.06;border-radius:10px;
+    border:1.5px solid var(--trait);background:var(--papier);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+    padding:0;overflow:hidden;
+  }
+  .jour.creux{border:0;background:transparent;pointer-events:none}
+  .jour .num{font-family:var(--mono);font-size:.82rem;font-weight:700;line-height:1}
+  .jour.avant{opacity:.4}
+  .jour.mienoui{border-color:var(--teal);border-width:2.5px;background:rgba(47,110,98,.09)}
+  .jour.miennon{background:rgba(92,58,33,.07)}
+  .jour.miennon .num{text-decoration:line-through;text-decoration-thickness:1.5px;color:var(--doux)}
+  .jour.soiree::before{
+    content:"";position:absolute;top:0;left:0;right:0;height:4px;background:var(--terracotta);
+  }
+  .jour.soiree .num{padding-top:3px}
+  .points{display:flex;gap:2.5px;height:6px;align-items:center}
+  .points i{width:5px;height:5px;border-radius:50%;background:rgba(92,58,33,.16)}
+  .points i.ok{background:var(--teal)}
+  .points i.tard{background:var(--terracotta)}
+  .conseilmois{
+    margin-top:16px;padding:13px 15px;border:1.5px solid var(--trait);border-radius:12px;
+    background:var(--papier);font-size:.85rem;line-height:1.55;
+  }
+  .conseilmois b{font-family:var(--mono);font-size:.8rem}
+  .aide{
+    margin-top:14px;font-family:var(--mono);font-size:.64rem;color:var(--doux);
+    display:flex;flex-wrap:wrap;gap:6px 16px;
+  }
+  .aide span{display:inline-flex;align-items:center;gap:6px}
+  .aide i{width:9px;height:9px;border-radius:50%;background:rgba(92,58,33,.16);display:inline-block}
+  .aide i.ok{background:var(--teal)}
+  .aide i.bar{background:var(--terracotta);border-radius:2px;width:14px;height:4px}
+
   /* ---------- Vide ---------- */
   .vide{
     text-align:center;padding:52px 24px;border:1.5px dashed var(--trait);
@@ -308,6 +361,9 @@ const db   = getFirestore(app);
 
 let moi = null, soirees = [], vue = "avenir", stop = null, stopMembres = null;
 let uidParEmail = {};                       // rempli par la collection "membres"
+let dispos = {};                            // uid -> { "2026-09-12": "oui"|"non" }
+let moisVu = null;                          // { a, m } du mois affiché dans l'onglet Dispos
+let stopDispos = null;
 const estAdmin = () => moi && moi.email === ADMIN_EMAIL;
 
 /* ---------------- Dates ---------------- */
@@ -429,6 +485,7 @@ function ecranApp(){
       <div class="onglets" role="tablist">
         <button class="onglet" id="t-avenir" role="tab">À venir</button>
         <button class="onglet" id="t-recap"  role="tab">Récap</button>
+        <button class="onglet" id="t-dispo"  role="tab">Dispos</button>
         <button class="onglet" id="t-passe"  role="tab">Passées</button>
       </div>
       <div id="liste"></div>
@@ -439,6 +496,7 @@ function ecranApp(){
   $("#sortir").onclick   = () => signOut(auth);
   $("#t-avenir").onclick = () => { vue = "avenir"; dessine(); };
   $("#t-recap").onclick  = () => { vue = "recap";  dessine(); };
+  $("#t-dispo").onclick  = () => { vue = "dispo";  dessine(); };
   $("#t-passe").onclick  = () => { vue = "passe";  dessine(); };
   if (admin) $("#ajouter").onclick = () => panneauSoiree(null);
 
@@ -448,6 +506,12 @@ function ecranApp(){
     uidParEmail = {};
     snap.docs.forEach(d => { const e = d.data().email; if (e) uidParEmail[e] = d.id; });
     if (soirees.length) dessine();
+  }, () => {});
+
+  stopDispos = onSnapshot(collection(db,"dispos"), snap => {
+    dispos = {};
+    snap.docs.forEach(d => { dispos[d.id] = d.data().jours || {}; });
+    if (vue === "dispo") dessine();
   }, () => {});
 
   stop = onSnapshot(query(collection(db,"events"), orderBy("debut")), snap => {
@@ -474,9 +538,11 @@ function dessine(){
   const admin = estAdmin();
   $("#t-avenir").setAttribute("aria-selected", vue === "avenir");
   $("#t-recap").setAttribute("aria-selected",  vue === "recap");
+  $("#t-dispo").setAttribute("aria-selected",  vue === "dispo");
   $("#t-passe").setAttribute("aria-selected",  vue === "passe");
 
   if (vue === "recap") return dessineRecap();
+  if (vue === "dispo") return dessineDispos();
 
   const now = Date.now();
   let lot = soirees.filter(s => vue === "avenir" ? s.fin >= now : s.fin < now);
@@ -527,6 +593,101 @@ function dessine(){
 }
 
 const SIGNE = { oui:"✓", tard:"+", non:"×", sans:"·" };
+const JOURS_COURTS = ["lun","mar","mer","jeu","ven","sam","dim"];
+const cleJour = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+
+async function basculeDispo(cle){
+  const actuel  = (dispos[moi.uid] || {})[cle] || "";
+  const suivant = actuel === "" ? "oui" : actuel === "oui" ? "non" : "";
+  try {
+    await setDoc(doc(db,"dispos",moi.uid),
+      { email: moi.email, jours: { [cle]: suivant } }, { merge:true });
+  } catch { alert("Disponibilité non enregistrée. Vérifie ta connexion."); }
+}
+
+function dessineDispos(){
+  const aujourdhui = new Date();
+  if (!moisVu) moisVu = { a: aujourdhui.getFullYear(), m: aujourdhui.getMonth() };
+  const { a, m } = moisVu;
+
+  const premier  = new Date(a, m, 1);
+  const nbJours  = new Date(a, m + 1, 0).getDate();
+  const decalage = (premier.getDay() + 6) % 7;          // semaine qui commence le lundi
+  const debutJour = new Date(); debutJour.setHours(0,0,0,0);
+
+  // soirées déjà posées ce mois-ci
+  const soireeParJour = {};
+  soirees.forEach(s => {
+    const d = new Date(s.debut);
+    if (d.getFullYear() === a && d.getMonth() === m) (soireeParJour[cleJour(d)] ||= []).push(s);
+  });
+
+  const emails = Object.keys(MEMBRES);
+  const cellules = [];
+  for (let i = 0; i < decalage; i++) cellules.push('<div class="jour creux"></div>');
+
+  const scores = [];
+  for (let n = 1; n <= nbJours; n++){
+    const d   = new Date(a, m, n);
+    const cle = cleJour(d);
+    const mien = (dispos[moi.uid] || {})[cle] || "";
+    const aSoiree = !!soireeParJour[cle];
+
+    let libres = 0;
+    const points = emails.map(email => {
+      const uid = uidParEmail[email];
+      const st  = uid ? (dispos[uid] || {})[cle] : "";
+      if (st === "oui") libres++;
+      return `<i class="${st === "oui" ? "ok" : ""}"></i>`;
+    }).join("");
+
+    if (d >= debutJour && !aSoiree) scores.push({ n, d, libres });
+
+    const classes = ["jour"];
+    if (mien === "oui") classes.push("mienoui");
+    if (mien === "non") classes.push("miennon");
+    if (aSoiree) classes.push("soiree");
+    if (d < debutJour) classes.push("avant");
+
+    cellules.push(`<button class="${classes.join(" ")}" data-jour="${cle}"
+      aria-label="${n} ${MOIS_LONG[m]}, ${libres} disponible${libres > 1 ? "s" : ""}${aSoiree ? ", soirée posée" : ""}">
+      <span class="num">${n}</span><span class="points">${points}</span></button>`);
+  }
+
+  const top = scores.filter(x => x.libres >= 2)
+                    .sort((x, y) => y.libres - x.libres || x.n - y.n)
+                    .slice(0, 3);
+
+  const conseil = top.length
+    ? `<div class="conseilmois">Les jours les plus favorables ce mois-ci :
+        ${top.map(x => `<b>${JOURS_COURTS[(x.d.getDay()+6)%7]} ${x.n}</b> (${x.libres}/${emails.length})`).join(" · ")}.
+        Les jours où une soirée est déjà posée ne sont pas comptés.</div>`
+    : `<div class="conseilmois">Pas encore assez de réponses pour proposer une date.
+        Tape sur les jours où tu es libre : une fois pour <b>disponible</b>, deux fois pour
+        <b>pas disponible</b>, trois fois pour effacer.</div>`;
+
+  $("#liste").innerHTML = `
+    <div class="navmois">
+      <button class="fleche" id="mois-moins" aria-label="Mois précédent">‹</button>
+      <h3>${MOIS_LONG[m]} ${a}</h3>
+      <button class="fleche" id="mois-plus" aria-label="Mois suivant">›</button>
+    </div>
+    <div class="grille">
+      ${JOURS_COURTS.map(j => `<div class="entetejour">${j}</div>`).join("")}
+      ${cellules.join("")}
+    </div>
+    ${conseil}
+    <div class="aide">
+      <span><i class="ok"></i> un point par membre disponible</span>
+      <span><i class="bar"></i> soirée déjà posée</span>
+    </div>`;
+
+  $("#mois-moins").onclick = () => { moisVu = m === 0  ? { a:a-1, m:11 } : { a, m:m-1 }; dessine(); };
+  $("#mois-plus").onclick  = () => { moisVu = m === 11 ? { a:a+1, m:0  } : { a, m:m+1 }; dessine(); };
+  document.querySelectorAll("[data-jour]").forEach(b => {
+    b.onclick = () => basculeDispo(b.dataset.jour);
+  });
+}
 
 function dessineRecap(){
   const lot = soirees.filter(s => s.fin >= Date.now());
@@ -754,7 +915,8 @@ onAuthStateChanged(auth, async u => {
   ferme();
   if (stop)        { stop(); stop = null; }
   if (stopMembres) { stopMembres(); stopMembres = null; }
-  soirees = []; uidParEmail = {};
+  if (stopDispos)  { stopDispos(); stopDispos = null; }
+  soirees = []; uidParEmail = {}; dispos = {}; moisVu = null;
 
   if (!u) { moi = null; return ecranConnexion(); }
 
