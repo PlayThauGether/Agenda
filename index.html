@@ -163,6 +163,54 @@
     padding:11px 17px;border-top:1.5px solid var(--trait);background:rgba(92,58,33,.03);
   }
 
+  /* ---------- Récap ---------- */
+  .recap{width:100%;border-collapse:collapse;font-family:var(--mono);table-layout:fixed}
+  .recap th,.recap td{padding:0;border-bottom:1.5px solid var(--trait)}
+  .recap thead th{
+    font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--doux);padding:0 0 9px;text-align:center;border-bottom-width:2.5px;
+    border-bottom-color:var(--terracotta);
+  }
+  .recap thead th.quoi{text-align:left}
+  .recap col.membre{width:34px}
+  .recap col.somme{width:40px}
+  .recap tbody td{padding:11px 0;text-align:center;vertical-align:middle}
+  .recap td.quoi{text-align:left;padding-right:10px}
+  .recap td.quoi b{
+    display:block;font-family:var(--corps);font-weight:600;font-size:.9rem;
+    line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .recap td.quoi span{font-size:.68rem;color:var(--doux)}
+  .recap tr.moisligne td{
+    padding:20px 0 7px;font-size:.62rem;font-weight:700;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--doux);text-align:left;border-bottom:0;
+  }
+  .recap tr.moisligne:first-child td{padding-top:4px}
+  .pion{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:23px;height:23px;border-radius:50%;font-size:.72rem;font-weight:700;
+    border:1.5px solid var(--trait);color:var(--doux);
+  }
+  .pion.oui{background:var(--teal);border-color:var(--teal);color:#fff}
+  .pion.tard{border-color:var(--terracotta);color:var(--terracotta)}
+  .pion.non{border-style:none;color:var(--trait);font-size:.95rem}
+  .pion.vide{border-style:dotted;border-color:var(--doux);opacity:.55}
+  .somme{font-size:.76rem;font-weight:700}
+  .somme.creux{color:var(--doux);font-weight:500}
+  .legende{
+    display:flex;flex-wrap:wrap;gap:14px;margin-top:16px;
+    font-family:var(--mono);font-size:.66rem;color:var(--doux);
+  }
+  .legende span{display:inline-flex;align-items:center;gap:6px}
+  @media (max-width:430px){
+    .recap col.membre{width:29px}
+    .recap col.somme{width:34px}
+    .pion{width:20px;height:20px;font-size:.66rem}
+    .recap td.quoi b{font-size:.84rem}
+    .recap td.quoi span{font-size:.62rem}
+    .recap thead th{font-size:.55rem;letter-spacing:.06em}
+  }
+
   /* ---------- Vide ---------- */
   .vide{
     text-align:center;padding:52px 24px;border:1.5px dashed var(--trait);
@@ -384,6 +432,7 @@ function ecranApp(){
       <div id="conseil"></div>
       <div class="onglets" role="tablist">
         <button class="onglet" id="t-avenir" role="tab">À venir</button>
+        <button class="onglet" id="t-recap"  role="tab">Récap</button>
         <button class="onglet" id="t-passe"  role="tab">Passées</button>
       </div>
       <div id="liste"></div>
@@ -393,6 +442,7 @@ function ecranApp(){
 
   $("#sortir").onclick   = () => signOut(auth);
   $("#t-avenir").onclick = () => { vue = "avenir"; dessine(); };
+  $("#t-recap").onclick  = () => { vue = "recap";  dessine(); };
   $("#t-passe").onclick  = () => { vue = "passe";  dessine(); };
   if (admin) $("#ajouter").onclick = () => panneauSoiree(null);
 
@@ -427,7 +477,10 @@ function conseilInstall(){
 function dessine(){
   const admin = estAdmin();
   $("#t-avenir").setAttribute("aria-selected", vue === "avenir");
+  $("#t-recap").setAttribute("aria-selected",  vue === "recap");
   $("#t-passe").setAttribute("aria-selected",  vue === "passe");
+
+  if (vue === "recap") return dessineRecap();
 
   const now = Date.now();
   let lot = soirees.filter(s => vue === "avenir" ? s.fin >= now : s.fin < now);
@@ -475,6 +528,68 @@ function dessine(){
     const sup = document.querySelector(`[data-sup="${s.id}"]`);
     if (sup) sup.onclick = () => supprimer(s);
   });
+}
+
+const PION = { oui:"✓", tard:"+", non:"–", vide:"?" };
+
+function dessineRecap(){
+  const lot = soirees.filter(s => s.fin >= Date.now());
+  if (!lot.length){
+    $("#liste").innerHTML = `<div class="vide"><strong>Rien à récapituler</strong>
+      Le tableau se remplira dès qu'une soirée sera posée.</div>`;
+    return;
+  }
+
+  const noms = Object.entries(MEMBRES);   // [email, prénom]
+  let dernierMois = null;
+
+  const lignes = lot.map(s => {
+    const d = new Date(s.debut);
+    const p = s.presences || {};
+    let entete = "";
+    const cleMois = `${d.getFullYear()}-${d.getMonth()}`;
+    if (cleMois !== dernierMois){
+      dernierMois = cleMois;
+      entete = `<tr class="moisligne"><td colspan="${noms.length + 2}">
+        ${MOIS_LONG[d.getMonth()]} ${d.getFullYear()}</td></tr>`;
+    }
+
+    let presents = 0;
+    const cases = noms.map(([email]) => {
+      const uid = uidParEmail[email];
+      const st  = (uid && p[uid]) || "vide";
+      if (st === "oui" || st === "tard") presents++;
+      return `<td><span class="pion ${st}">${PION[st]}</span></td>`;
+    }).join("");
+
+    return entete + `<tr>
+      <td class="quoi">
+        <b>${txt(s.titre)}</b>
+        <span>${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")} · ${heure(s.debut)}${s.lieu ? " · " + txt(s.lieu) : ""}</span>
+      </td>
+      ${cases}
+      <td class="somme ${presents === 0 ? "creux" : ""}">${presents}/${noms.length}</td>
+    </tr>`;
+  }).join("");
+
+  $("#liste").innerHTML = `
+    <table class="recap">
+      <colgroup>
+        <col>${noms.map(() => '<col class="membre">').join("")}<col class="somme">
+      </colgroup>
+      <thead><tr>
+        <th class="quoi">Soirée</th>
+        ${noms.map(([, nom]) => `<th title="${txt(nom)}">${txt(nom).slice(0,3)}</th>`).join("")}
+        <th>Là</th>
+      </tr></thead>
+      <tbody>${lignes}</tbody>
+    </table>
+    <div class="legende">
+      <span><i class="pion oui">✓</i> là</span>
+      <span><i class="pion tard">+</i> arrive plus tard</span>
+      <span><i class="pion non">–</i> pas là</span>
+      <span><i class="pion vide">?</i> pas répondu</span>
+    </div>`;
 }
 
 function carte(s, admin){
