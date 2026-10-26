@@ -96,6 +96,89 @@
   }
   .onglet[aria-selected="true"]{color:var(--marron);border-bottom-color:var(--terracotta)}
 
+  /* ---------- À faire / relances ---------- */
+  .faire{
+    border:1.5px solid var(--trait);border-radius:var(--rayon);
+    background:var(--papier);margin-bottom:26px;overflow:hidden;
+  }
+  .faire-titre{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:12px 16px;background:var(--marron);color:var(--beige);
+  }
+  .faire-titre h3{
+    font-family:var(--mono);font-size:.64rem;font-weight:700;letter-spacing:.14em;
+    text-transform:uppercase;margin:0;
+  }
+  .faire-titre .pastoche{
+    font-family:var(--mono);font-size:.64rem;font-weight:700;
+    background:var(--terracotta);color:#fff;border-radius:999px;padding:2px 8px;
+  }
+  .faire-ligne{
+    display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+    padding:13px 16px;border-top:1.5px solid var(--trait);
+  }
+  .faire-ligne:first-of-type{border-top:0}
+  .faire-quoi{flex:1;min-width:150px;font-size:.87rem;line-height:1.45}
+  .faire-quoi b{font-weight:600}
+  .faire-quoi em{
+    font-style:normal;font-family:var(--mono);font-size:.7rem;color:var(--doux);
+    display:block;margin-top:2px;
+  }
+  .btn.wa{background:var(--teal);color:#fff;padding:8px 15px;font-size:.82rem;white-space:nowrap}
+  .btn.wa:hover{opacity:.85}
+
+  /* ---------- Soirées en attente ---------- */
+  .att-bloc{margin-bottom:34px}
+  .att-titre{
+    display:flex;align-items:baseline;justify-content:space-between;gap:12px;
+    margin:4px 0 13px;padding-bottom:9px;
+    border-bottom:2.5px dashed var(--terracotta);
+  }
+  .att-titre h3{
+    font-family:var(--display);font-weight:800;font-size:1.05rem;
+    letter-spacing:.03em;text-transform:uppercase;margin:0;color:var(--terracotta);
+  }
+  .att-titre .compte{font-family:var(--mono);font-size:.68rem;color:var(--doux);font-weight:500}
+  .carte.en-attente{
+    border-style:dashed;border-color:rgba(192,82,42,.55);
+    background:linear-gradient(0deg,rgba(192,82,42,.035),rgba(192,82,42,.035)),var(--papier);
+  }
+  .att-badge{
+    display:inline-block;font-family:var(--mono);font-size:.58rem;font-weight:700;
+    letter-spacing:.12em;text-transform:uppercase;
+    padding:3px 8px;border-radius:999px;margin-bottom:6px;
+    border:1.5px solid var(--terracotta);color:var(--terracotta);
+  }
+  .att-badge.pret{background:var(--terracotta);color:#fff;border-color:var(--terracotta)}
+  .att-barre{
+    display:flex;align-items:center;gap:11px;flex-wrap:wrap;
+    padding:12px 17px;border-top:1.5px dashed rgba(192,82,42,.4);
+    background:rgba(192,82,42,.05);
+  }
+  .att-jauge{
+    font-family:var(--mono);font-size:.72rem;font-weight:700;color:var(--doux);flex:1;min-width:120px;
+  }
+  .att-jauge b{color:var(--terracotta)}
+  .att-jauge.pret b{color:var(--teal)}
+  .btn.mini{padding:8px 15px;font-size:.82rem}
+  .att-note{
+    font-size:.84rem;color:var(--doux);line-height:1.5;
+    margin:0 0 16px;padding:11px 14px;
+    border-left:3px solid var(--terracotta);background:rgba(192,82,42,.06);
+    border-radius:0 8px 8px 0;
+  }
+  .recap-att{
+    font-family:var(--mono);font-size:.56rem;font-weight:700;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--terracotta);
+    border:1px solid var(--terracotta);border-radius:999px;padding:1px 6px;margin-left:6px;
+    white-space:nowrap;
+  }
+  .jour.soireeatt::before{
+    content:"";position:absolute;top:0;left:0;right:0;height:4px;
+    background:repeating-linear-gradient(90deg,var(--terracotta) 0 4px,transparent 4px 8px);
+  }
+  .jour.soireeatt .num{padding-top:3px}
+
   /* ---------- En-tête de mois ---------- */
   .mois{
     display:flex;align-items:baseline;justify-content:space-between;gap:12px;
@@ -145,11 +228,13 @@
   .jeton.oui::before{background:#fff}
   .jeton.tard{border-color:var(--terracotta);color:var(--terracotta)}
   .jeton.tard::before{background:var(--terracotta)}
+  .jeton.peutetre{border-style:dashed;border-color:var(--marron);color:var(--marron);opacity:.75}
+  .jeton.peutetre::before{background:var(--marron)}
   .jeton.non{color:var(--doux);text-decoration:line-through;text-decoration-thickness:1.5px}
   .jeton.moi{box-shadow:0 0 0 3px rgba(92,58,33,.1)}
 
   /* ---------- Barre de réponse ---------- */
-  .repondre{display:flex;gap:8px;padding:0 17px 15px}
+  .repondre{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 17px 15px}
   .rep{
     flex:1;border:1.5px solid var(--trait);background:transparent;border-radius:10px;
     padding:10px 4px;font-size:.84rem;font-weight:600;color:var(--doux);
@@ -159,6 +244,11 @@
   .rep[aria-pressed="true"]{background:var(--marron);border-color:var(--marron);color:var(--beige)}
   .rep.oui[aria-pressed="true"]{background:var(--teal);border-color:var(--teal);color:#fff}
   .rep.tard[aria-pressed="true"]{background:var(--terracotta);border-color:var(--terracotta);color:#fff}
+  .rep.peutetre[aria-pressed="true"]{
+    background:transparent;border-color:var(--marron);border-style:dashed;
+    border-width:2px;color:var(--marron);
+  }
+  .rep.non[aria-pressed="true"]{background:var(--marron);border-color:var(--marron);color:var(--beige)}
 
   .pied-carte{
     display:flex;gap:16px;align-items:center;
@@ -191,6 +281,7 @@
   .sig{font-size:.98rem;font-weight:700;line-height:1}
   .sig.oui{color:var(--teal)}
   .sig.tard{color:var(--terracotta)}
+  .sig.peutetre{color:var(--marron);opacity:.6;font-weight:700}
   .sig.non{color:var(--doux);font-weight:500}
   .sig.sans{color:rgba(92,58,33,.26);font-weight:500}
   .tot{font-size:.74rem;font-weight:700;color:var(--marron)}
@@ -282,6 +373,10 @@
   .aide i{width:9px;height:9px;border-radius:50%;background:rgba(92,58,33,.16);display:inline-block}
   .aide i.ok{background:var(--teal)}
   .aide i.bar{background:var(--terracotta);border-radius:2px;width:14px;height:4px}
+  .aide i.bar.tirets{
+    background:repeating-linear-gradient(90deg,var(--terracotta) 0 4px,transparent 4px 8px);
+    border-radius:0;
+  }
 
   /* ---------- Vide ---------- */
   .vide{
@@ -357,6 +452,17 @@ const MEMBRES = {
 // ─────────────────────────────────────────────────────────────
 const ADMIN_EMAIL = "roykeaneperso@gmail.com";
 
+// ─────────────────────────────────────────────────────────────
+//  4. Combien de présents suffisent pour qu'une soirée en
+//     attente devienne validable
+// ─────────────────────────────────────────────────────────────
+const SEUIL_VALIDATION = 2;
+
+// ─────────────────────────────────────────────────────────────
+//  5. Adresse publique de l'agenda, glissée dans les messages
+// ─────────────────────────────────────────────────────────────
+const LIEN_APP = "https://playthaugether.github.io/Agenda/";
+
 // ═════════════════════════════════════════════════════════════
 //  Rien à toucher en dessous
 // ═════════════════════════════════════════════════════════════
@@ -398,10 +504,11 @@ const db   = getFirestore(app);
 
 let moi = null, soirees = [], vue = "avenir", stop = null, stopMembres = null;
 let uidParEmail = {};                       // rempli par la collection "membres"
-let dispos = {};                            // uid -> { "2026-09-12": "oui"|"non" }
+let dispos = {};                            // e-mail -> { "2026-09-12": "oui" }
 let moisVu = null;                          // { a, m } du mois affiché dans l'onglet Dispos
 let stopDispos = null;
-const estAdmin = () => moi && moi.email === ADMIN_EMAIL;
+let monEmail = "";                          // moi.email, toujours en minuscules
+const estAdmin = () => monEmail === ADMIN_EMAIL;
 
 /* ---------------- Dates ---------------- */
 const JOURS = ["dimanche","lundi","mardi","mercredi","jeudi","vendredi","samedi"];
@@ -514,7 +621,7 @@ function ecranApp(){
       <header class="bandeau">
         <h1 class="marque">Agenda<span>Play Thau'Gether</span></h1>
         <div class="qui">
-          <span>${MEMBRES[moi.email] || moi.email}</span>
+          <span>${MEMBRES[monEmail] || moi.email}</span>
           <button class="lien-nu" id="sortir">Se déconnecter</button>
         </div>
       </header>
@@ -542,13 +649,16 @@ function ecranApp(){
   stopMembres = onSnapshot(collection(db,"membres"), snap => {
     uidParEmail = {};
     snap.docs.forEach(d => { const e = d.data().email; if (e) uidParEmail[e] = d.id; });
-    if (soirees.length) dessine();
+    if (moi) dessine();
   }, () => {});
 
   stopDispos = onSnapshot(collection(db,"dispos"), snap => {
     dispos = {};
-    snap.docs.forEach(d => { dispos[d.id] = d.data().jours || {}; });
-    if (vue === "dispo") dessine();
+    snap.docs.forEach(d => {
+      const e = (d.data().email || "").toLowerCase();
+      if (e) dispos[e] = d.data().jours || {};
+    });
+    if (moi) dessine();
   }, () => {});
 
   stop = onSnapshot(query(collection(db,"events"), orderBy("debut")), snap => {
@@ -606,7 +716,14 @@ function dessine(){
   let lot = soirees.filter(s => vue === "avenir" ? s.fin >= now : s.fin < now);
   if (vue === "passe") lot = lot.reverse();
 
-  if (!lot.length){
+  // Les soirées à valider sortent du flux mensuel et passent en tête.
+  let attente = [];
+  if (vue === "avenir"){
+    attente = lot.filter(enAttente);
+    lot     = lot.filter(s => !enAttente(s));
+  }
+
+  if (!lot.length && !attente.length){
     $("#liste").innerHTML = vue === "avenir"
       ? `<div class="vide"><strong>Rien de posé pour l'instant</strong>
          ${admin ? "Pose la première soirée avec le bouton en bas." : "Aucune soirée posée pour le moment."}</div>`
@@ -623,7 +740,21 @@ function dessine(){
     g.items.push(s);
   });
 
-  $("#liste").innerHTML = groupes.map(g => `
+  const blocFaire = admin ? construitAFaire([...attente, ...lot]) : "";
+
+  const blocAttente = attente.length ? `
+    <section class="att-bloc">
+      <div class="att-titre">
+        <h3>En attente de validation</h3>
+        <span class="compte">${attente.length} soirée${attente.length > 1 ? "s" : ""}</span>
+      </div>
+      <p class="att-note">${admin
+        ? `Dis si tu viens, comme pour les autres. Dès que ${SEUIL_VALIDATION} personnes ont confirmé « je viens », tu peux valider la soirée — elle rejoint alors le programme et devient exportable vers ton agenda.`
+        : `Ces soirées ne sont pas encore confirmées. Réponds quand même : il faut ${SEUIL_VALIDATION} « je viens » pour qu'elles soient validées. « Là plus tard » et « peut-être » ne comptent pas, il faut des gens capables de tenir la soirée.`}</p>
+      ${attente.map(s => carte(s, admin)).join("")}
+    </section>` : "";
+
+  $("#liste").innerHTML = blocFaire + blocAttente + groupes.map(g => `
     <section class="groupe">
       <div class="mois">
         <h3>${g.titre} <span class="compte">${g.items.length} soirée${g.items.length > 1 ? "s" : ""}</span></h3>
@@ -637,7 +768,14 @@ function dessine(){
     if (b) b.onclick = () => panneauMois(g);
   });
 
-  lot.forEach(s => {
+  document.querySelectorAll("[data-wa]").forEach(b => {
+    const s = soirees.find(x => x.id === b.dataset.wa);
+    if (s) b.onclick = () => versWhatsApp(b.dataset.type, s);
+  });
+
+  [...attente, ...lot].forEach(s => {
+    const val = document.querySelector(`[data-val="${s.id}"]`);
+    if (val) val.onclick = () => validerSoiree(s);
     document.querySelectorAll(`[data-rep="${s.id}"]`).forEach(b => {
       b.onclick = () => repondre(s, b.dataset.statut);
     });
@@ -650,16 +788,153 @@ function dessine(){
   });
 }
 
-const SIGNE = { oui:"✓", tard:"+", non:"×", sans:"·" };
+// Une soirée sans champ statut est considérée validée : les soirées
+// créées avant cette fonctionnalité restent affichées normalement.
+const enAttente = s => s.statut === "attente";
+// Le seuil sert à savoir si la soirée peut être TENUE : seuls les
+// "je viens" comptent. Un retardataire ou un "peut-être" ne permet
+// pas d'encadrer la soirée.
+const confirmes = s => Object.values(s.presences || {})
+                             .filter(v => v === "oui").length;
+
+/* ---------------- Messages WhatsApp ---------------- */
+
+// Qui n'a pas encore répondu sur cette soirée
+function sansReponse(s){
+  const p = s.presences || {};
+  return Object.entries(MEMBRES)
+    .filter(([email]) => { const uid = uidParEmail[email]; return !uid || !p[uid]; })
+    .map(([, nom]) => nom);
+}
+// Les noms par statut, pour rédiger des messages qui ne mélangent pas
+// ceux qui tiennent la soirée et ceux qui passent en cours de route.
+function nomsParStatut(s, statut){
+  const p = s.presences || {};
+  return Object.entries(MEMBRES)
+    .filter(([email]) => { const uid = uidParEmail[email]; return uid && p[uid] === statut; })
+    .map(([, nom]) => nom);
+}
+
+const quand = s => `${jourLong(s.debut)} à ${heure(s.debut)}`;
+const liste = n => n.length < 2 ? (n[0] || "") : n.slice(0,-1).join(", ") + " et " + n[n.length-1];
+
+function texteMessage(type, s){
+  // Tiret plutôt qu'une préposition : "au La Hune" serait fautif, et le champ
+  // lieu peut contenir n'importe quelle forme (L'Audace, Cinéma Quai des Lumières...).
+  const lieu = s.lieu ? ` — ${s.lieu}` : "";
+  if (type === "nouvelle")
+    return `Nouvelle soirée posée : ${s.titre}, ${quand(s)}${lieu}.\n\n`
+         + `Dites si vous êtes là : ${LIEN_APP}`;
+  if (type === "relance"){
+    const manquants = sansReponse(s);
+    return `Il manque encore ${liste(manquants)} sur ${s.titre}, ${quand(s)}${lieu}.\n\n`
+         + `Un clic suffit : ${LIEN_APP}`;
+  }
+  if (type === "veille"){
+    const surs  = nomsParStatut(s, "oui");
+    const tard  = nomsParStatut(s, "tard");
+    const peut  = nomsParStatut(s, "peutetre");
+    const bouts = [];
+    if (surs.length) bouts.push(`Présents : ${liste(surs)}.`);
+    if (tard.length) bouts.push(`Plus tard : ${liste(tard)}.`);
+    if (peut.length) bouts.push(`Peut-être : ${liste(peut)}.`);
+    return `Rappel : ${s.titre} c'est demain à ${heure(s.debut)}${lieu}.\n\n`
+         + (bouts.length ? bouts.join("\n") : `Personne n'a confirmé pour l'instant.`);
+  }
+  if (type === "validee")
+    return `${s.titre} est validée : ${quand(s)}${lieu}.\n\n`
+         + `Ajoutez-la à votre agenda depuis l'app : ${LIEN_APP}`;
+  return "";
+}
+
+// wa.me ouvre WhatsApp avec le texte prêt ; le choix du groupe reste manuel,
+// WhatsApp ne permet pas de cibler une conversation depuis un lien.
+function versWhatsApp(type, s){
+  const texte = texteMessage(type, s);
+  const url = "https://wa.me/?text=" + encodeURIComponent(texte);
+  const f = window.open(url, "_blank", "noopener");
+  if (!f) panneauTexte(texte);           // pop-up bloquée : on montre le texte à copier
+}
+
+function panneauPrevenir(type, s){
+  ouvre(`
+    <h3>${type === "nouvelle" ? "Soirée posée" : "Soirée validée"}</h3>
+    <p class="sous">Prévenir le groupe maintenant ? Le message est déjà rédigé,
+    tu n'as qu'à choisir la conversation et envoyer.</p>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <button class="btn wa large" id="prevenir">Envoyer sur WhatsApp</button>
+      <button class="lien-nu" id="pas-maintenant" style="margin-top:6px">Pas maintenant</button>
+    </div>`);
+  $("#prevenir").onclick = () => { const t = type; ferme(); versWhatsApp(t, s); };
+  $("#pas-maintenant").onclick = ferme;
+}
+
+function panneauTexte(texte){
+  ouvre(`
+    <h3>Message prêt</h3>
+    <p class="sous">WhatsApp ne s'est pas ouvert. Copie le message et colle-le dans le groupe.</p>
+    <textarea id="txt-msg" style="min-height:150px">${txt(texte)}</textarea>
+    <div class="duo">
+      <button class="btn contour" id="fermer-txt">Fermer</button>
+      <button class="btn plein-terracotta" id="copier">Copier</button>
+    </div>`);
+  $("#fermer-txt").onclick = ferme;
+  $("#copier").onclick = async () => {
+    try { await navigator.clipboard.writeText(texte); $("#copier").textContent = "Copié"; }
+    catch { $("#txt-msg").select(); }
+  };
+}
+
+// Ce qui mérite un message aujourd'hui, par ordre d'urgence.
+function construitAFaire(lot){
+  const now = Date.now();
+  const lignes = [];
+
+  // 1. Demain : rappel aux présents
+  lot.filter(s => !enAttente(s) && s.debut > now && s.debut < now + 36*3600000)
+     .forEach(s => lignes.push({
+       quoi: `<b>${txt(s.titre)}</b> c'est demain<em>${nomsParStatut(s,"oui").length} confirmé${nomsParStatut(s,"oui").length > 1 ? "s" : ""} · ${heure(s.debut)}</em>`,
+       type: "veille", id: s.id, libelle: "Rappel" }));
+
+  // 2. Soirées en attente qui ont atteint le seuil
+  lot.filter(s => enAttente(s) && confirmes(s) >= SEUIL_VALIDATION)
+     .forEach(s => lignes.push({
+       quoi: `<b>${txt(s.titre)}</b> peut être validée<em>${confirmes(s)} confirmés · ${quand(s)}</em>`,
+       type: null, id: s.id, libelle: "Valider", valider: true }));
+
+  // 3. Réponses manquantes sur les soirées proches.
+  //    On saute celles déjà listées comme validables : l'action utile est
+  //    de valider, pas de relancer.
+  const dejaListees = new Set(lignes.map(l => l.id));
+  lot.filter(s => s.debut > now && s.debut < now + 14*86400000
+                  && sansReponse(s).length && !dejaListees.has(s.id))
+     .forEach(s => lignes.push({
+       quoi: `<b>${txt(s.titre)}</b> attend ${liste(sansReponse(s))}<em>${quand(s)}</em>`,
+       type: "relance", id: s.id, libelle: "Relancer" }));
+
+  if (!lignes.length) return "";
+
+  return `<div class="faire">
+    <div class="faire-titre"><h3>À faire</h3><span class="pastoche">${lignes.length}</span></div>
+    ${lignes.map(l => `<div class="faire-ligne">
+      <span class="faire-quoi">${l.quoi}</span>
+      ${l.valider
+        ? `<button class="btn mini plein-terracotta" data-val="${l.id}">${l.libelle}</button>`
+        : `<button class="btn mini wa" data-wa="${l.id}" data-type="${l.type}">${l.libelle}</button>`}
+    </div>`).join("")}
+  </div>`;
+}
+
+const SIGNE = { oui:"✓", tard:"+", peutetre:"?", non:"×", sans:"·" };
 const JOURS_COURTS = ["lun","mar","mer","jeu","ven","sam","dim"];
 const cleJour = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
 
 async function basculeDispo(cle){
-  const actuel  = (dispos[moi.uid] || {})[cle] || "";
+  const actuel  = (dispos[monEmail] || {})[cle] || "";
   const suivant = actuel === "oui" ? "" : "oui";   // coché = dispo, rien = pas dispo
   try {
     await setDoc(doc(db,"dispos",moi.uid),
-      { email: moi.email, jours: { [cle]: suivant } }, { merge:true });
+      { email: monEmail, jours: { [cle]: suivant } }, { merge:true });
   } catch { alert("Disponibilité non enregistrée. Vérifie ta connexion."); }
 }
 
@@ -679,6 +954,10 @@ function dessineDispos(){
     const d = new Date(s.debut);
     if (d.getFullYear() === a && d.getMonth() === m) (soireeParJour[cleJour(d)] ||= []).push(s);
   });
+  // Un jour compte comme "pris" seulement si une soirée validée y est posée ;
+  // une soirée encore en attente est signalée différemment.
+  const estPris    = cle => (soireeParJour[cle] || []).some(s => !enAttente(s));
+  const estPropose = cle => (soireeParJour[cle] || []).some(enAttente);
 
   const emails = Object.keys(MEMBRES);
   const cellules = [];
@@ -688,13 +967,13 @@ function dessineDispos(){
   for (let n = 1; n <= nbJours; n++){
     const d   = new Date(a, m, n);
     const cle = cleJour(d);
-    const mien = (dispos[moi.uid] || {})[cle] || "";
-    const aSoiree = !!soireeParJour[cle];
+    const mien = (dispos[monEmail] || {})[cle] || "";
+    const aSoiree  = estPris(cle);
+    const aPropose = estPropose(cle);
 
     const libresNoms = [];
     const points = emails.map(email => {
-      const uid = uidParEmail[email];
-      const st  = uid ? (dispos[uid] || {})[cle] : "";
+      const st = (dispos[email] || {})[cle] || "";
       if (st === "oui") libresNoms.push(MEMBRES[email]);
       return `<i class="${st === "oui" ? "ok" : ""}"></i>`;
     }).join("");
@@ -705,6 +984,7 @@ function dessineDispos(){
     const classes = ["jour"];
     if (mien === "oui") classes.push("mienoui");
     if (aSoiree) classes.push("soiree");
+    else if (aPropose) classes.push("soireeatt");
     if (d < debutJour) classes.push("avant");
 
     cellules.push(`<button class="${classes.join(" ")}" data-jour="${cle}"
@@ -740,6 +1020,7 @@ function dessineDispos(){
     <div class="aide">
       <span><i class="ok"></i> un point par membre disponible</span>
       <span><i class="bar"></i> soirée déjà posée</span>
+      <span><i class="bar tirets"></i> soirée en attente de validation</span>
       <span>tape un jour pour te déclarer libre, retape pour annuler</span>
     </div>`;
 
@@ -772,11 +1053,12 @@ function dessineRecap(){
       entete = `<tr class="moisligne"><td colspan="${noms.length + 2}">${MOIS_LONG[d.getMonth()]} ${d.getFullYear()}</td></tr>`;
     }
 
-    let presents = 0;
+    // Une seule définition du compte dans toute l'app : les "je viens".
+    let surs = 0;
     const cases = noms.map(([email]) => {
       const uid = uidParEmail[email];
       const st  = (uid && p[uid]) || "sans";
-      if (st === "oui" || st === "tard") presents++;
+      if (st === "oui") surs++;
       return `<td><span class="sig ${st}">${SIGNE[st]}</span></td>`;
     }).join("");
 
@@ -784,11 +1066,11 @@ function dessineRecap(){
 
     return entete + `<tr>
       <td class="quoi">
-        <b>${txt(s.titre)}</b>
+        <b>${txt(s.titre)}${enAttente(s) ? `<span class="recap-att">à valider</span>` : ""}</b>
         <span>${jj} · ${heure(s.debut)}${s.lieu ? " · " + txt(s.lieu) : ""}</span>
       </td>
       ${cases}
-      <td class="tot ${presents === 0 ? "creux" : ""}">${presents}/${noms.length}</td>
+      <td class="tot ${surs === 0 ? "creux" : ""}">${surs}/${noms.length}</td>
     </tr>`;
   }).join("");
 
@@ -800,13 +1082,14 @@ function dessineRecap(){
       <thead><tr>
         <th class="quoi">Soirée</th>
         ${noms.map(([, nom]) => `<th title="${txt(nom)}">${txt(nom).slice(0,3)}</th>`).join("")}
-        <th>Là</th>
+        <th title="Nombre de « je viens »">Sûrs</th>
       </tr></thead>
       <tbody>${lignes}</tbody>
     </table>
     <div class="legende">
       <span><b class="sig oui">✓</b> là</span>
       <span><b class="sig tard">+</b> arrive plus tard</span>
+      <span><b class="sig peutetre">?</b> peut-être</span>
       <span><b class="sig non">×</b> pas là</span>
       <span><b class="sig sans">·</b> pas répondu</span>
     </div>`;
@@ -818,22 +1101,26 @@ function carte(s, admin){
   const mien = p[moi.uid] || null;
   const passee = s.fin < Date.now();
   const vient  = mien === "oui" || mien === "tard";
+  const att    = enAttente(s);
+  const nb     = confirmes(s);
+  const pret   = nb >= SEUIL_VALIDATION;
 
   const appel = Object.entries(MEMBRES).map(([email, nom]) => {
     const uid = uidParEmail[email];
     const st  = (uid && p[uid]) || "";
-    return `<span class="jeton ${st} ${email === moi.email ? "moi" : ""}">${nom}</span>`;
+    return `<span class="jeton ${st} ${email === monEmail ? "moi" : ""}">${nom}</span>`;
   }).join("");
 
-  const LIBELLE = { oui:"Je viens", tard:"Là plus tard", non:"Pas là" };
-  const boutons = ["oui","tard","non"].map(st => `
+  const LIBELLE = { oui:"Je viens", tard:"Là plus tard", peutetre:"Peut-être", non:"Pas là" };
+  const boutons = ["oui","tard","peutetre","non"].map(st => `
     <button class="rep ${st}" data-rep="${s.id}" data-statut="${st}"
       aria-pressed="${mien === st}">${LIBELLE[st]}</button>`).join("");
 
-  return `<article class="carte ${passee ? "passee" : ""}">
+  return `<article class="carte ${passee ? "passee" : ""} ${att ? "en-attente" : ""}">
     <div class="haut">
       <div class="pastille"><span class="j">${d.getDate()}</span><span class="m">${MOIS[d.getMonth()]}</span></div>
       <div class="infos">
+        ${att ? `<span class="att-badge ${pret ? "pret" : ""}">${pret ? "Prête à valider" : "En attente"}</span>` : ""}
         <h2>${txt(s.titre)}</h2>
         <div class="meta">
           ${jourLong(s.debut)} · <b>${heure(s.debut)} → ${heure(s.fin)}</b>
@@ -844,8 +1131,12 @@ function carte(s, admin){
     </div>
     <div class="appel">${appel}</div>
     ${passee ? "" : `<div class="repondre">${boutons}</div>`}
-    ${(vient && !passee) || admin ? `<div class="pied-carte">
-      ${vient && !passee ? `<button class="lien-nu" data-cal="${s.id}">Ajouter à mon agenda</button>` : ""}
+    ${att && !passee ? `<div class="att-barre">
+      <span class="att-jauge ${pret ? "pret" : ""}"><b>${nb}</b> / ${SEUIL_VALIDATION} ${pret ? "— le compte y est" : "confirmé" + (nb > 1 ? "s" : "")}</span>
+      ${admin ? `<button class="btn mini ${pret ? "plein-terracotta" : "contour"}" data-val="${s.id}">Valider la soirée</button>` : ""}
+    </div>` : ""}
+    ${(vient && !passee && !att) || admin ? `<div class="pied-carte">
+      ${vient && !passee && !att ? `<button class="lien-nu" data-cal="${s.id}">Ajouter à mon agenda</button>` : ""}
       ${admin ? `<button class="lien-nu" data-mod="${s.id}">Modifier</button>
                  <button class="lien-nu" data-sup="${s.id}">Supprimer</button>` : ""}
     </div>` : ""}
@@ -860,8 +1151,21 @@ async function repondre(s, statut){
   const suivant = avant === statut ? null : statut;
   try {
     await updateDoc(doc(db,"events",s.id), { ["presences." + moi.uid]: suivant });
-    if (suivant === "oui" || suivant === "tard") panneauAgenda(s);
+    // Inutile de proposer l'agenda pour une soirée qui peut encore tomber à l'eau.
+    if (!enAttente(s) && (suivant === "oui" || suivant === "tard")) panneauAgenda(s);
   } catch { alert("Réponse non enregistrée. Vérifie ta connexion."); }
+}
+
+async function validerSoiree(s){
+  const nb = confirmes(s);
+  const message = nb >= SEUIL_VALIDATION
+    ? `Valider « ${s.titre} » ? Elle rejoindra le programme et chacun pourra l'ajouter à son agenda.`
+    : `Seulement ${nb} confirmé${nb > 1 ? "s" : ""} sur les ${SEUIL_VALIDATION} attendus. Valider quand même « ${s.titre} » ?`;
+  if (!confirm(message)) return;
+  try {
+    await updateDoc(doc(db,"events",s.id), { statut: "ok" });
+    panneauPrevenir("validee", { ...s, statut: "ok" });
+  } catch { alert("Validation impossible. Vérifie ta connexion."); }
 }
 
 async function supprimer(s){
@@ -918,9 +1222,11 @@ function panneauSoiree(s){
   const edition = !!s;
   const debutDefaut = s ? pourInput(s.debut) : "";
   const finDefaut   = s ? pourInput(s.fin)   : "";
+  let attDefaut = s ? enAttente(s) : false;
   ouvre(`
     <h3>${edition ? "Modifier la soirée" : "Poser une soirée"}</h3>
-    <p class="sous">Les cinq membres la verront tout de suite.</p>
+    <p class="sous">Les cinq membres la verront tout de suite. Une soirée
+    <b>en attente</b> apparaît en haut de la liste jusqu'à ce que tu la valides.</p>
     <div id="err"></div>
     <label for="f-titre">Nom de la soirée</label>
     <input id="f-titre" value="${txt(s?.titre)}" placeholder="Loup-Garou">
@@ -932,10 +1238,27 @@ function panneauSoiree(s){
     </div>
     <label for="f-desc">Précisions (facultatif)</label>
     <textarea id="f-desc" placeholder="Ramener les cartes">${txt(s?.description)}</textarea>
+    <label>Statut</label>
+    <div class="duo" style="margin-bottom:15px">
+      <button type="button" class="btn contour" id="st-ok"
+        aria-pressed="${!attDefaut}">Confirmée</button>
+      <button type="button" class="btn contour" id="st-att"
+        aria-pressed="${attDefaut}">En attente</button>
+    </div>
     <div class="duo" style="margin-top:6px">
       <button class="btn contour" id="annuler">Annuler</button>
       <button class="btn plein-terracotta" id="valider">${edition ? "Enregistrer" : "Poser la soirée"}</button>
     </div>`);
+
+  const peintStatut = () => {
+    $("#st-ok").setAttribute("aria-pressed", !attDefaut);
+    $("#st-att").setAttribute("aria-pressed", attDefaut);
+    $("#st-ok").className  = attDefaut ? "btn contour" : "btn";
+    $("#st-att").className = attDefaut ? "btn plein-terracotta" : "btn contour";
+  };
+  peintStatut();
+  $("#st-ok").onclick  = () => { attDefaut = false; peintStatut(); };
+  $("#st-att").onclick = () => { attDefaut = true;  peintStatut(); };
 
   $("#f-debut").onchange = () => {
     if (!$("#f-fin").value && $("#f-debut").value) {
@@ -956,13 +1279,17 @@ function panneauSoiree(s){
     const donnees = {
       titre, debut, fin,
       lieu: $("#f-lieu").value.trim(),
-      description: $("#f-desc").value.trim()
+      description: $("#f-desc").value.trim(),
+      statut: attDefaut ? "attente" : "ok"
     };
     const b = $("#valider"); b.disabled = true; b.textContent = "Enregistrement…";
     try {
-      if (edition) await updateDoc(doc(db,"events",s.id), donnees);
-      else         await addDoc(collection(db,"events"), { ...donnees, presences:{} });
-      ferme();
+      if (edition) { await updateDoc(doc(db,"events",s.id), donnees); ferme(); }
+      else {
+        const ref = await addDoc(collection(db,"events"), { ...donnees, presences:{} });
+        ferme();
+        panneauPrevenir("nouvelle", { id: ref.id, ...donnees });
+      }
     } catch {
       b.disabled = false; b.textContent = edition ? "Enregistrer" : "Poser la soirée";
       erreurForm("Enregistrement impossible. Vérifie ta connexion.");
@@ -979,12 +1306,12 @@ onAuthStateChanged(auth, async u => {
   if (stopDispos)  { stopDispos(); stopDispos = null; }
   soirees = []; uidParEmail = {}; dispos = {}; moisVu = null;
 
-  if (!u) { moi = null; return ecranConnexion(); }
+  if (!u) { moi = null; monEmail = ""; return ecranConnexion(); }
 
   const email = (u.email || "").toLowerCase();
-  if (!MEMBRES[email]) { moi = null; return ecranRefus(u.email); }
+  if (!MEMBRES[email]) { moi = null; monEmail = ""; return ecranRefus(u.email); }
 
-  moi = u;
+  moi = u; monEmail = email;
   // L'app enregistre elle-même l'UID : aucun UID à recopier à la main.
   setDoc(doc(db,"membres",u.uid), { email, nom: MEMBRES[email] }, { merge:true }).catch(()=>{});
   ecranApp();
