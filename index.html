@@ -769,6 +769,13 @@ function dessine(){
   });
 
   document.querySelectorAll("[data-wa]").forEach(b => {
+    if (b.dataset.type === "relance-lot"){
+      const groupe = lot.concat(attente)
+        .filter(x => x.debut > Date.now() && sansReponse(x).length)
+        .sort((x, y) => x.debut - y.debut);
+      b.onclick = () => versWhatsApp("relance-lot", groupe);
+      return;
+    }
     const s = soirees.find(x => x.id === b.dataset.wa);
     if (s) b.onclick = () => versWhatsApp(b.dataset.type, s);
   });
@@ -825,6 +832,29 @@ function texteMessage(type, s){
   if (type === "nouvelle")
     return `Nouvelle soirée posée : ${s.titre}, ${quand(s)}${lieu}.\n\n`
          + `Dites si vous êtes là : ${LIEN_APP}`;
+  if (type === "relance-lot"){
+    // Lieu et titre communs sortis en en-tête : une proposition de salle
+    // arrive en bloc, inutile de répéter huit fois la même ligne.
+    const memeLieu  = s.every(x => x.lieu  === s[0].lieu)  && s[0].lieu;
+    const memeTitre = s.every(x => x.titre === s[0].titre);
+    const entete = memeTitre && memeLieu
+      ? `Il reste des dates à valider pour ${s[0].titre} — ${s[0].lieu} :`
+      : memeLieu
+      ? `Il reste des réponses à donner — ${s[0].lieu} :`
+      : `Il reste des réponses à donner sur l'agenda :`;
+
+    const lignes = s.map(x => {
+      const manquants = sansReponse(x);
+      const qui = manquants.length === Object.keys(MEMBRES).length
+        ? "personne n'a répondu"
+        : `il manque ${liste(manquants)}`;
+      const quoi = memeTitre ? "" : `${x.titre}, `;
+      const ou   = memeLieu  ? "" : (x.lieu ? ` — ${x.lieu}` : "");
+      return `- ${quoi}${quand(x)}${ou} : ${qui}`;
+    });
+    return `${entete}\n\n${lignes.join("\n")}\n\n`
+         + `Un clic par soirée suffit : ${LIEN_APP}`;
+  }
   if (type === "relance"){
     const manquants = sansReponse(s);
     return `Il manque encore ${liste(manquants)} sur ${s.titre}, ${quand(s)}${lieu}.\n\n`
@@ -886,8 +916,9 @@ function panneauTexte(texte){
 }
 
 // Ce qui mérite un message aujourd'hui, par ordre d'urgence.
-function construitAFaire(lot){
+function construitAFaire(lotBrut){
   const now = Date.now();
+  const lot = [...lotBrut].sort((a, b) => a.debut - b.debut);
   const lignes = [];
 
   // 1. Demain : rappel aux présents
@@ -902,15 +933,23 @@ function construitAFaire(lot){
        quoi: `<b>${txt(s.titre)}</b> peut être validée<em>${confirmes(s)} confirmés · ${quand(s)}</em>`,
        type: null, id: s.id, libelle: "Valider", valider: true }));
 
-  // 3. Réponses manquantes sur les soirées proches.
-  //    On saute celles déjà listées comme validables : l'action utile est
-  //    de valider, pas de relancer.
-  const dejaListees = new Set(lignes.map(l => l.id));
-  lot.filter(s => s.debut > now && s.debut < now + 14*86400000
-                  && sansReponse(s).length && !dejaListees.has(s.id))
-     .forEach(s => lignes.push({
-       quoi: `<b>${txt(s.titre)}</b> attend ${liste(sansReponse(s))}<em>${quand(s)}</em>`,
-       type: "relance", id: s.id, libelle: "Relancer" }));
+  // 3. Réponses manquantes : TOUTES les soirées à venir, sans limite de
+  //    date — une proposition de lieu peut arriver des mois à l'avance.
+  const aRelancer = lot.filter(s => s.debut > now && sansReponse(s).length);
+
+  if (aRelancer.length === 1){
+    const s = aRelancer[0];
+    lignes.push({
+      quoi: `<b>${txt(s.titre)}</b> attend ${liste(sansReponse(s))}<em>${quand(s)}</em>`,
+      type: "relance", id: s.id, libelle: "Relancer" });
+  } else if (aRelancer.length > 1){
+    // Un seul message pour tout le lot : huit messages d'affilée dans le
+    // groupe, personne ne les lit.
+    lignes.push({
+      quoi: `<b>${aRelancer.length} soirées</b> attendent des réponses`
+          + `<em>de ${jourLong(aRelancer[0].debut)} à ${jourLong(aRelancer[aRelancer.length-1].debut)}</em>`,
+      type: "relance-lot", id: "lot", libelle: "Relancer" });
+  }
 
   if (!lignes.length) return "";
 
